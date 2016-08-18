@@ -36,8 +36,6 @@
 		9F3287291D63A8A50092F006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9F32872C1D63A8A50092F006 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		9F32872E1D63A8A50092F006 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9F3287331D63A8A50092F006 /* SpotifyTickerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpotifyTickerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		9F32873E1D63A8A50092F006 /* SpotifyTickerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpotifyTickerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F3287531D63C8110092F006 /* Spotify.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Spotify.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -78,8 +76,6 @@
 			isa = PBXGroup;
 			children = (
 				9F3287241D63A8A40092F006 /* SpotifyTicker.app */,
-				9F3287331D63A8A50092F006 /* SpotifyTickerTests.xctest */,
-				9F32873E1D63A8A50092F006 /* SpotifyTickerUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -115,42 +111,6 @@
 			productName = SpotifyTicker;
 			productReference = 9F3287241D63A8A40092F006 /* SpotifyTicker.app */;
 			productType = "com.apple.product-type.application";
-		};
-		9F3287321D63A8A50092F006 /* SpotifyTickerTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 9F32874A1D63A8A50092F006 /* Build configuration list for PBXNativeTarget "SpotifyTickerTests" */;
-			buildPhases = (
-				9F32872F1D63A8A50092F006 /* Sources */,
-				9F3287301D63A8A50092F006 /* Frameworks */,
-				9F3287311D63A8A50092F006 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				9F3287351D63A8A50092F006 /* PBXTargetDependency */,
-			);
-			name = SpotifyTickerTests;
-			productName = SpotifyTickerTests;
-			productReference = 9F3287331D63A8A50092F006 /* SpotifyTickerTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		9F32873D1D63A8A50092F006 /* SpotifyTickerUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 9F32874D1D63A8A50092F006 /* Build configuration list for PBXNativeTarget "SpotifyTickerUITests" */;
-			buildPhases = (
-				9F32873A1D63A8A50092F006 /* Sources */,
-				9F32873B1D63A8A50092F006 /* Frameworks */,
-				9F32873C1D63A8A50092F006 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				9F3287401D63A8A50092F006 /* PBXTargetDependency */,
-			);
-			name = SpotifyTickerUITests;
-			productName = SpotifyTickerUITests;
-			productReference = 9F32873E1D63A8A50092F006 /* SpotifyTickerUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
@@ -189,8 +149,6 @@
 			projectRoot = "";
 			targets = (
 				9F3287231D63A8A40092F006 /* SpotifyTicker */,
-				9F3287321D63A8A50092F006 /* SpotifyTickerTests */,
-				9F32873D1D63A8A50092F006 /* SpotifyTickerUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -378,56 +336,6 @@
 			};
 			name = Release;
 		};
-		9F32874B1D63A8A50092F006 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SpotifyTickerTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = elken.SpotifyTickerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SpotifyTicker.app/Contents/MacOS/SpotifyTicker";
-			};
-			name = Debug;
-		};
-		9F32874C1D63A8A50092F006 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SpotifyTickerTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = elken.SpotifyTickerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SpotifyTicker.app/Contents/MacOS/SpotifyTicker";
-			};
-			name = Release;
-		};
-		9F32874E1D63A8A50092F006 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SpotifyTickerUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = elken.SpotifyTickerUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = SpotifyTicker;
-			};
-			name = Debug;
-		};
-		9F32874F1D63A8A50092F006 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SpotifyTickerUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = elken.SpotifyTickerUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = SpotifyTicker;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -445,22 +353,6 @@
 			buildConfigurations = (
 				9F3287481D63A8A50092F006 /* Debug */,
 				9F3287491D63A8A50092F006 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-		};
-		9F32874A1D63A8A50092F006 /* Build configuration list for PBXNativeTarget "SpotifyTickerTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				9F32874B1D63A8A50092F006 /* Debug */,
-				9F32874C1D63A8A50092F006 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-		};
-		9F32874D1D63A8A50092F006 /* Build configuration list for PBXNativeTarget "SpotifyTickerUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				9F32874E1D63A8A50092F006 /* Debug */,
-				9F32874F1D63A8A50092F006 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 		};

@@ -33,7 +33,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9F3287321D63A8A50092F006"
-               BuildableName = "SpotifyTickerTests.xctest"
+               BuildableName = "SpotifyTickerTests"
                BlueprintName = "SpotifyTickerTests"
                ReferencedContainer = "container:SpotifyTicker.xcodeproj">
             </BuildableReference>
@@ -43,7 +43,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9F32873D1D63A8A50092F006"
-               BuildableName = "SpotifyTickerUITests.xctest"
+               BuildableName = "SpotifyTickerUITests"
                BlueprintName = "SpotifyTickerUITests"
                ReferencedContainer = "container:SpotifyTicker.xcodeproj">
             </BuildableReference>
