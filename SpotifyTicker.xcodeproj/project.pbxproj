@@ -7,54 +7,29 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9F088C481D68C6A200CA13FE /* EventMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F088C471D68C6A200CA13FE /* EventMonitor.swift */; };
 		9F3287281D63A8A50092F006 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F3287271D63A8A50092F006 /* AppDelegate.swift */; };
 		9F32872A1D63A8A50092F006 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9F3287291D63A8A50092F006 /* Assets.xcassets */; };
 		9F32872D1D63A8A50092F006 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9F32872B1D63A8A50092F006 /* MainMenu.xib */; };
 		9F3287541D63C8110092F006 /* Spotify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F3287531D63C8110092F006 /* Spotify.swift */; };
+		9FF14CEB1D684553005E6056 /* PopoverController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF14CE91D684553005E6056 /* PopoverController.swift */; };
+		9FF14CEC1D684553005E6056 /* PopoverController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9FF14CEA1D684553005E6056 /* PopoverController.xib */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		9F3287341D63A8A50092F006 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9F32871C1D63A8A40092F006 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 9F3287231D63A8A40092F006;
-			remoteInfo = SpotifyTicker;
-		};
-		9F32873F1D63A8A50092F006 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9F32871C1D63A8A40092F006 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 9F3287231D63A8A40092F006;
-			remoteInfo = SpotifyTicker;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
+		9F088C471D68C6A200CA13FE /* EventMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventMonitor.swift; sourceTree = "<group>"; };
 		9F3287241D63A8A40092F006 /* SpotifyTicker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpotifyTicker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F3287271D63A8A50092F006 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9F3287291D63A8A50092F006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9F32872C1D63A8A50092F006 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		9F32872E1D63A8A50092F006 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9F3287531D63C8110092F006 /* Spotify.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Spotify.swift; sourceTree = "<group>"; };
+		9FF14CE91D684553005E6056 /* PopoverController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopoverController.swift; sourceTree = "<group>"; };
+		9FF14CEA1D684553005E6056 /* PopoverController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PopoverController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		9F3287211D63A8A40092F006 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		9F3287301D63A8A50092F006 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		9F32873B1D63A8A50092F006 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -86,8 +61,11 @@
 				9F3287271D63A8A50092F006 /* AppDelegate.swift */,
 				9F3287291D63A8A50092F006 /* Assets.xcassets */,
 				9F32872B1D63A8A50092F006 /* MainMenu.xib */,
+				9FF14CE91D684553005E6056 /* PopoverController.swift */,
+				9FF14CEA1D684553005E6056 /* PopoverController.xib */,
 				9F32872E1D63A8A50092F006 /* Info.plist */,
 				9F3287531D63C8110092F006 /* Spotify.swift */,
+				9F088C471D68C6A200CA13FE /* EventMonitor.swift */,
 			);
 			path = SpotifyTicker;
 			sourceTree = "<group>";
@@ -125,14 +103,6 @@
 					9F3287231D63A8A40092F006 = {
 						CreatedOnToolsVersion = 7.3.1;
 					};
-					9F3287321D63A8A50092F006 = {
-						CreatedOnToolsVersion = 7.3.1;
-						TestTargetID = 9F3287231D63A8A40092F006;
-					};
-					9F32873D1D63A8A50092F006 = {
-						CreatedOnToolsVersion = 7.3.1;
-						TestTargetID = 9F3287231D63A8A40092F006;
-					};
 				};
 			};
 			buildConfigurationList = 9F32871F1D63A8A40092F006 /* Build configuration list for PBXProject "SpotifyTicker" */;
@@ -158,22 +128,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9FF14CEC1D684553005E6056 /* PopoverController.xib in Resources */,
 				9F32872A1D63A8A50092F006 /* Assets.xcassets in Resources */,
 				9F32872D1D63A8A50092F006 /* MainMenu.xib in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		9F3287311D63A8A50092F006 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		9F32873C1D63A8A50092F006 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -185,38 +142,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				9F3287541D63C8110092F006 /* Spotify.swift in Sources */,
+				9FF14CEB1D684553005E6056 /* PopoverController.swift in Sources */,
 				9F3287281D63A8A50092F006 /* AppDelegate.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		9F32872F1D63A8A50092F006 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		9F32873A1D63A8A50092F006 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				9F088C481D68C6A200CA13FE /* EventMonitor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		9F3287351D63A8A50092F006 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 9F3287231D63A8A40092F006 /* SpotifyTicker */;
-			targetProxy = 9F3287341D63A8A50092F006 /* PBXContainerItemProxy */;
-		};
-		9F3287401D63A8A50092F006 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 9F3287231D63A8A40092F006 /* SpotifyTicker */;
-			targetProxy = 9F32873F1D63A8A50092F006 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		9F32872B1D63A8A50092F006 /* MainMenu.xib */ = {
@@ -355,6 +287,7 @@
 				9F3287491D63A8A50092F006 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

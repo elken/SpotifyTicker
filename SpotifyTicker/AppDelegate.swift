@@ -1,10 +1,10 @@
-//
-//  AppDelegate.swift
-//  SpotifyTicker
-//
-//  Created by elken on 16/08/2016.
-//  Copyright © 2016 tdos. All rights reserved.
-//
+/*
+*  AppDelegate.swift
+*  SpotifyTicker
+*
+*  Created by elken on 16/08/2016.
+*  Copyright © 2016 tdos. All rights reserved.
+*/
 
 import Cocoa
 import ScriptingBridge
@@ -15,49 +15,72 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var statusMenu: NSMenu!
     var timer: NSTimer!
-    var statusItem: NSStatusItem!
+    var statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(NSVariableStatusItemLength)
+
     var pausedIcon: String!
     
-    var spotify = SBApplication(bundleIdentifier: "com.spotify.client") as SpotifyApplication!
+    var popover: NSPopover!
     
-    var repeatItem: NSMenuItem!
-    var shuffleItem: NSMenuItem!
+    var spotifyController: SpotifyController!
+    var popoverController: PopoverController!
+    
+    var eventMonitor: EventMonitor!
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
+        popover = NSPopover();
+        statusMenu = NSMenu();
+        spotifyController = SpotifyController();
+        
+        if let button = statusItem.button {
+            button.action = #selector(togglePopover);
+        }
+        
+        popoverController = PopoverController(nibName: "PopoverController", bundle: nil);
+        popover.contentViewController = popoverController;
+        popover.behavior = NSPopoverBehavior.Transient;
         timer = NSTimer.scheduledTimerWithTimeInterval(1.0, target: self, selector: #selector(timerDidFire), userInfo: nil, repeats: true);
         NSDistributedNotificationCenter.defaultCenter().addObserver(self, selector: #selector(notify), name: "com.spotify.client.PlaybackStateChanged", object: nil);
-        NSDistributedNotificationCenter.defaultCenter().addObserver(self, selector: #selector(updateIcon), name: "AppleInterfaceThemeChangedNotification", object: nil);
-        NSDistributedNotificationCenter.defaultCenter().addObserver(self, selector: #selector(test), name: "com.apple.HIToolbox.beginMenuTrackingNotification", object: nil);
-        statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(-1.0)
-        statusItem.image = NSImage(named: "spotify");
+        NSDistributedNotificationCenter.defaultCenter().addObserver(self, selector: #selector(toggleDark), name: "AppleInterfaceThemeChangedNotification", object: nil);
         
-        repeatItem = NSMenuItem(title: "Repeat: \(spotify.repeating!.boolValue ? "On" : "Off")", action: #selector(toggleRepeat), keyEquivalent: "");
-        shuffleItem = NSMenuItem(title: "Shuffle: \(spotify.shuffling!.boolValue ? "On" : "Off")", action: #selector(toggleShuffle), keyEquivalent: "");
-        
-        statusMenu = NSMenu();
-        
-        statusMenu.addItem(repeatItem);
-        statusMenu.addItem(shuffleItem);
-        statusMenu.addItem(NSMenuItem.separatorItem());
-        statusMenu.addItem(NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: ""));
-        
-        statusItem.menu = statusMenu;
         statusItem.highlightMode = true;
-        updateIcon();
+        toggleDark();
+        updateImage();
+        
+        // Event monitor to listen for clicks outside the popover
+        eventMonitor = EventMonitor(mask: NSEventMask.LeftMouseDownMask) { [unowned self] event in
+            if self.popover.shown {
+                self.closePopover(event);
+            }
+        }
+        eventMonitor.start();
     }
     
-    func delay(delay:Double, closure:()->()) {
-        dispatch_after(
-            dispatch_time(
-                DISPATCH_TIME_NOW,
-                Int64(delay * Double(NSEC_PER_SEC))
-            ),
-            dispatch_get_main_queue(), closure)
+    func updateImage() {
+        statusItem.image = NSImage(named: updateIcon());
     }
     
-    func test() {
-        delay(1) {
-            print("Hit");
+    func updateTitle(name: String) {
+        statusItem.title = name;
+    }
+    
+    func showPopover(sender: AnyObject?) {
+        if let button = statusItem.button {
+            popover.showRelativeToRect(button.bounds, ofView: button, preferredEdge: NSRectEdge.MinY);
+            popoverController.updateView();
+        }
+        eventMonitor!.start();
+    }
+    
+    func closePopover(sender: AnyObject?) {
+        popover.performClose(sender);
+        eventMonitor!.stop();
+    }
+    
+    func togglePopover(sender: AnyObject?) {
+        if popover.shown {
+            closePopover(sender);
+        } else {
+            showPopover(sender);
         }
     }
     
@@ -69,19 +92,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return hours == 0 ? String.init(format: "%02d:%02d", minutes, seconds) : String.init(format: "%02d:%02d%02d", hours, minutes, seconds);
     }
     
-    func updateIcon() {
-        pausedIcon = NSUserDefaults.standardUserDefaults().stringForKey("AppleInterfaceStyle") == "Dark" ? "spotify-white" : "spotify-black";
-        if (spotify.playerState == SpotifyEPlS.Playing) {
-            statusItem.image = NSImage(named: "spotify");
-        } else {
-            statusItem.image = NSImage(named: pausedIcon);
-        }
+    func updateIcon() -> String {
+        return spotifyController.isPlaying() ? "spotify" : pausedIcon;
     }
 
     func applicationWillTerminate(aNotification: NSNotification) {
         NSDistributedNotificationCenter.defaultCenter().removeObserver(self);
-        spotify = nil;
-        statusItem = nil;
         statusMenu = nil;
         timer.invalidate();
         timer = nil;
@@ -89,38 +105,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func timerDidFire() {
         updateTrackInfo();
-        repeatItem.title = "Repeat: \(spotify.repeating!.boolValue ? "On" : "Off")";
-        shuffleItem.title = "Shuffle: \(spotify.shuffling!.boolValue ? "On" : "Off")";
     }
     
     func notify() {
         updateTrackInfo();
-        updateIcon();
-    }
-    
-    func quit(sender : NSMenuItem) {
-        NSApp.terminate(self);
+        updateImage();
     }
     
     func updateTrackInfo() {
-        if (spotify.playerState == SpotifyEPlS.Playing) {
-            let current = spotify.currentTrack!;
-            let position = timeFormatted(Int(spotify.playerPosition!));
+        if (spotifyController.isPlaying()) {
+            let current = spotifyController.currentTrack();
+            let position = timeFormatted(spotifyController.playerPosition());
             let duration = timeFormatted((current.duration)! / 1000);
-            statusItem.title = String.init(format: "%@ - %@ (%@/%@)", (current.artist)!, (current.name)!, position, duration);
+            updateTitle(String.init(format: "%@ - %@ (%@/%@)", (current.artist)!, (current.name)!, position, duration));
         } else {
             statusItem.title = "▐▐";
         }
     }
-
-    func toggleRepeat() {
-        spotify.setRepeating!(!spotify.repeating!.boolValue);
-        repeatItem.title = "Repeat: \(spotify.repeating!.boolValue ? "On" : "Off")";
+    
+    func toggleDark() {
+        pausedIcon = NSUserDefaults.standardUserDefaults().stringForKey("AppleInterfaceStyle") == "Dark" ? "spotify-white" : "spotify-black";
+        updateImage();
     }
-
-    func toggleShuffle() {
-        spotify.setShuffling!(!spotify.shuffling!.boolValue);
-        shuffleItem.title = "Shuffle: \(spotify.shuffling!.boolValue ? "On" : "Off")";
+    
+    func quit(sender : NSMenuItem) {
+        NSApp.terminate(self);
     }
 }
 
