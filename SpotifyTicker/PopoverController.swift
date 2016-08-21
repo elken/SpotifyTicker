@@ -14,21 +14,52 @@ class PopoverController: NSViewController {
     var repeatBox: NSButton!
     var spotify: SpotifyController!
 
-    var currentArtwork: NSString!
+    var currentArtwork: NSString! = "";
     
-    var imageView: NSImageView!
+    @IBOutlet weak var artistLabel: NSTextField!
+    @IBOutlet weak var songLabel: NSTextField!
+    @IBOutlet weak var albumLabel: NSTextField!
     
-    var playPauseButton: NSButton!
-    var shuffleButton: NSButton!
-    var repeatButton: NSButton!
-
+    @IBOutlet weak var imageView: NSImageView!
+    
+    @IBOutlet weak var playPauseButton: NSButton!
+    @IBOutlet weak var repeatButton: NSButton!
+    @IBOutlet weak var shuffleButton: NSButton!
+    
+    @IBOutlet weak var volumeSlider: NSSlider!
+    @IBOutlet weak var volumeLabel: NSTextField!
+    
     override func viewDidLoad() {
         super.viewDidLoad();
         NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: #selector(timerDidFire), userInfo: nil, repeats: true);
-        imageView = view.subviews.filter{$0 is NSImageView}[0] as! NSImageView;
         spotify = SpotifyController();
+        
+        updateView();
+    }
+    
+    /**
+    Update the relevant view items. Could be lazier.
+    */
+    func updateView() {
+        artistLabel.stringValue = spotify.currentTrack().artist!;
+        albumLabel.stringValue = spotify.currentTrack().album!;
+        songLabel.stringValue = spotify.currentTrack().name!;
+        
+        playPauseButton.image = NSImage(named: spotify.isPlaying() ? "pauseTemplate" : "playTemplate");
+        
+        volumeLabel.stringValue = "Volume: \(spotify.volume()) %";
+        volumeSlider.integerValue = spotify.volume();
+        updateShuffleStatus();
+        updateRepeatStatus();
+        updateArtwork();
+    }
+    
+    func timerDidFire() {
+        updateView();
+    }
+
+    func updateArtwork() {
         let id = spotify.currentTrack().id!().characters.split{ $0 == ":" }.map(String.init)[2];
-//        downloadArtwork(currentArtwork);
         if let url = NSURL(string: "https://api.spotify.com/v1/tracks/\(id)"){
             let request = NSMutableURLRequest(URL: url)
             request.HTTPMethod = "GET"
@@ -37,54 +68,16 @@ class PopoverController: NSViewController {
             session.dataTaskWithRequest(request, completionHandler: { (returnData, response, error) -> Void in
                 do {
                     let jsonResult: NSDictionary = try NSJSONSerialization.JSONObjectWithData(returnData!, options: NSJSONReadingOptions.MutableContainers) as! NSDictionary
-                    print(jsonResult["album"]!["images"]!!);
-                    self.downloadArtwork(jsonResult["album"]!["images"]!![0]["url"]!! as! NSString);
+                    let result = jsonResult["album"]!["images"]!![0]["url"]!! as! NSString;
+                    if !self.currentArtwork.isEqualToString(result as String) {
+                        self.downloadArtwork(result);
+                        self.currentArtwork = result;
+                    }
                 } catch {
                     print("Error parsing.");
                 }
                 
             }).resume()
-        }
-        updateView();
-    }
-    
-    /**
-    Update the relevant view items. Could be lazier.
-    */
-    func updateView() {
-        let buttons: [NSButton] = view.subviews.filter{$0 is NSButton} as! [NSButton];
-        let labels: [NSTextField] = view.subviews.filter{$0 is NSTextField} as! [NSTextField];
-        for button in buttons {
-            if button.tag == 2 {
-                playPauseButton = button;
-                button.image = NSImage(named: spotify.isPlaying() ? "pauseTemplate" : "playTemplate");
-            } else if button.tag == 4 {
-                repeatButton = button;
-                updateRepeatStatus();
-            } else if button.tag == 5 {
-                shuffleButton = button;
-                updateShuffleStatus();
-            }
-        }
-        
-        for label in labels {
-            if label.tag == 1 {
-                label.stringValue = spotify.currentTrack().artist!;
-            } else if label.tag == 2 {
-                label.stringValue = spotify.currentTrack().name!;
-            } else if label.tag == 3 {
-                label.stringValue = spotify.currentTrack().album!;
-            }
-        }
-    }
-    
-    func timerDidFire() {
-        updateView();
-    }
-
-    func updateArtwork() {
-        if !currentArtwork.isEqualToString(spotify.artworkURL()) {
-            downloadArtwork(spotify.artworkURL());
         }
     }
     
@@ -148,5 +141,10 @@ class PopoverController: NSViewController {
             spotify.play();
             playPauseButton.image = NSImage(named: "pauseTemplate");
         }
+    }
+    
+    @IBAction func sliderChange(sender: NSSliderCell) {
+        volumeLabel.stringValue = "\(sender.intValue) %";
+        spotify.setVolume(sender.integerValue);
     }
 }

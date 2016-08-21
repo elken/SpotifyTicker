@@ -168,4 +168,12 @@ class SpotifyController {
     func play() {
         spotify.play!();
     }
+    
+    func volume() -> Int {
+        return spotify.soundVolume!;
+    }
+    
+    func setVolume(volume: Int) {
+        spotify.setSoundVolume!(volume);
+    }
 }
