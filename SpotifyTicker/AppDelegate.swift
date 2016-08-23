@@ -12,47 +12,66 @@ import Darwin
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
-
-    var statusMenu: NSMenu!
-    var timer: NSTimer!
-    var statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(NSVariableStatusItemLength)
-
-    var pausedIcon: String!
     
-    var popover: NSPopover!
+    weak var timer: NSTimer!
     
-    var spotifyController: SpotifyController!
-    var popoverController: PopoverController!
+    weak var pausedIcon: NSString!
+    
+    var spotifyController: SpotifyController! = SpotifyController();
+    var popoverController: PopoverController! = PopoverController(nibName: "PopoverController", bundle: nil);
     
     var eventMonitor: EventMonitor!
+    
+    lazy var statusItem: NSStatusItem = {
+        let statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(NSVariableStatusItemLength);
+        statusItem.button?.target = self;
+        statusItem.button?.action = #selector(AppDelegate.showContextMenu(_:));
+        let options: NSEventMask = [.LeftMouseUpMask, .RightMouseUpMask];
+        statusItem.button?.sendActionOn(Int(options.rawValue));
+        return statusItem;
+    }()
+    
+    lazy var statusMenu: NSMenu = {
+        let rightClickMenu = NSMenu();
+        rightClickMenu.addItem(NSMenuItem(title: "Quit", action: #selector(AppDelegate.quit), keyEquivalent: ""));
+        return rightClickMenu;
+    }()
+    
+    lazy var popover: NSPopover! = {
+        let popover = NSPopover();
+        popover.contentViewController = self.popoverController;
+        popover.animates = true;
+        popover.behavior = .Transient;
+        return popover;
+    }()
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
-        popover = NSPopover();
-        statusMenu = NSMenu();
-        spotifyController = SpotifyController();
         
-        if let button = statusItem.button {
-            button.action = #selector(togglePopover);
-        }
-        
-        popoverController = PopoverController(nibName: "PopoverController", bundle: nil);
-        popover.contentViewController = popoverController;
-        popover.behavior = NSPopoverBehavior.Transient;
         timer = NSTimer.scheduledTimerWithTimeInterval(1.0, target: self, selector: #selector(timerDidFire), userInfo: nil, repeats: true);
+        NSRunLoop.mainRunLoop().addTimer(timer, forMode: NSRunLoopCommonModes)
+
         NSDistributedNotificationCenter.defaultCenter().addObserver(self, selector: #selector(notify), name: "com.spotify.client.PlaybackStateChanged", object: nil);
         NSDistributedNotificationCenter.defaultCenter().addObserver(self, selector: #selector(toggleDark), name: "AppleInterfaceThemeChangedNotification", object: nil);
         
-        statusItem.highlightMode = true;
         toggleDark();
         updateImage();
         
-        // Event monitor to listen for clicks outside the popover
         eventMonitor = EventMonitor(mask: NSEventMask.LeftMouseDownMask) { [unowned self] event in
             if self.popover.shown {
                 self.closePopover(event);
             }
         }
         eventMonitor.start();
+        timer.fire();
+    }
+    
+    func showContextMenu(sender: NSStatusBarButton!){
+        switch NSApp.currentEvent!.type {
+        case .RightMouseUp:
+            statusItem.popUpStatusItemMenu(statusMenu);
+        default:
+            togglePopover(sender);
+        }
     }
     
     func updateImage() {
@@ -66,7 +85,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func showPopover(sender: AnyObject?) {
         if let button = statusItem.button {
             popover.showRelativeToRect(button.bounds, ofView: button, preferredEdge: NSRectEdge.MinY);
-            popoverController.updateView();
         }
         eventMonitor!.start();
     }
@@ -89,16 +107,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let minutes: Int = (totalSeconds / 60) % 60;
         let hours: Int = totalSeconds / 3600;
         
-        return hours == 0 ? String.init(format: "%02d:%02d", minutes, seconds) : String.init(format: "%02d:%02d%02d", hours, minutes, seconds);
+        return hours == 0 ? String(format: "%02d:%02d", minutes, seconds) : String(format: "%02d:%02d%02d", hours, minutes, seconds);
     }
     
     func updateIcon() -> String {
-        return spotifyController.isPlaying() ? "spotify" : pausedIcon;
+        return (spotifyController.isPlaying() ? "spotify" : pausedIcon) as String;
     }
 
     func applicationWillTerminate(aNotification: NSNotification) {
         NSDistributedNotificationCenter.defaultCenter().removeObserver(self);
-        statusMenu = nil;
         timer.invalidate();
         timer = nil;
     }
@@ -117,9 +134,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let current = spotifyController.currentTrack();
             let position = timeFormatted(spotifyController.playerPosition());
             let duration = timeFormatted((current.duration)! / 1000);
-            updateTitle(String.init(format: "%@ - %@ (%@/%@)", (current.artist)!, (current.name)!, position, duration));
+            updateTitle("\(current.artist!) - \(current.name!) (\(position)/\(duration)");
         } else {
-            statusItem.title = "▐▐";
+            statusItem.title = "▐▐ ";
         }
     }
     

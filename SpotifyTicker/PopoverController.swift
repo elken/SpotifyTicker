@@ -11,8 +11,7 @@ import Foundation
 
 class PopoverController: NSViewController {
     
-    var repeatBox: NSButton!
-    var spotify: SpotifyController!
+    var spotify: SpotifyController! = SpotifyController();
 
     var currentArtwork: NSString! = "";
     
@@ -32,7 +31,6 @@ class PopoverController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad();
         NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: #selector(timerDidFire), userInfo: nil, repeats: true);
-        spotify = SpotifyController();
         
         updateView();
     }
@@ -68,7 +66,7 @@ class PopoverController: NSViewController {
             session.dataTaskWithRequest(request, completionHandler: { (returnData, response, error) -> Void in
                 do {
                     let jsonResult: NSDictionary = try NSJSONSerialization.JSONObjectWithData(returnData!, options: NSJSONReadingOptions.MutableContainers) as! NSDictionary
-                    let result = jsonResult["album"]!["images"]!![0]["url"]!! as! NSString;
+                    let result = jsonResult["album"]!["images"]!![2]["url"]!! as! NSString;
                     if !self.currentArtwork.isEqualToString(result as String) {
                         self.downloadArtwork(result);
                         self.currentArtwork = result;
@@ -87,7 +85,7 @@ class PopoverController: NSViewController {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
             let data = NSData(contentsOfURL: url!);
             dispatch_async(dispatch_get_main_queue(), {
-                self.imageView.image = NSImage.init(data: data!);
+                self.imageView.image = NSImage(data: data!);
             });
         }
     }

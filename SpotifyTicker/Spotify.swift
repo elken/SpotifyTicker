@@ -176,4 +176,8 @@ class SpotifyController {
     func setVolume(volume: Int) {
         spotify.setSoundVolume!(volume);
     }
+    
+//    func isRunning() -> Bool {
+//        return spotify.a
+//    }
 }
