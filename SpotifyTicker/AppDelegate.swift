@@ -134,7 +134,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let current = spotifyController.currentTrack();
             let position = timeFormatted(spotifyController.playerPosition());
             let duration = timeFormatted((current.duration)! / 1000);
-            updateTitle("\(current.artist!) - \(current.name!) (\(position)/\(duration)");
+            updateTitle("\(current.artist!) - \(current.name!) (\(position)/\(duration))");
         } else {
             statusItem.title = "▐▐ ";
         }
