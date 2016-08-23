@@ -140,6 +140,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func notify() {
+        self.popoverController.downloadArtwork();
         updateTrackInfo();
         updateImage();
     }
@@ -149,7 +150,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let current = spotifyController.currentTrack();
             let position = timeFormatted(spotifyController.playerPosition());
             let duration = timeFormatted((current.duration)! / 1000);
-//            updateTitle(preferencesController.checkOrDefault("titleFormat", def: "\(current.artist!) - \(current.name!) (\(position)/\(duration))"));
             var format: String = preferencesController.checkOrDefault("titleFormat", def: "%a - %s (%p/%d)");
             
             let d: [String: String] = ["%a": "\(current.artist!)",
