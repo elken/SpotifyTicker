@@ -46,6 +46,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }()
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
+        self.popoverController.downloadArtwork();
         
         timer = NSTimer.scheduledTimerWithTimeInterval(1.0, target: self, selector: #selector(timerDidFire), userInfo: nil, repeats: true);
         NSRunLoop.mainRunLoop().addTimer(timer, forMode: NSRunLoopCommonModes)
@@ -146,7 +147,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func quit(sender : NSMenuItem) {
-        NSApp.terminate(self);
+        NSApplication.sharedApplication().terminate(self);
     }
 }
 

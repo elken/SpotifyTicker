@@ -12,8 +12,10 @@ import Foundation
 class PopoverController: NSViewController {
     
     var spotify: SpotifyController! = SpotifyController();
-
+    
     var currentArtwork: NSString! = "";
+    
+    var currentImage: NSImage!
     
     @IBOutlet weak var artistLabel: NSTextField!
     @IBOutlet weak var songLabel: NSTextField!
@@ -36,8 +38,8 @@ class PopoverController: NSViewController {
     }
     
     /**
-    Update the relevant view items. Could be lazier.
-    */
+     Update the relevant view items. Could be lazier.
+     */
     func updateView() {
         artistLabel.stringValue = spotify.currentTrack().artist!;
         albumLabel.stringValue = spotify.currentTrack().album!;
@@ -55,39 +57,42 @@ class PopoverController: NSViewController {
     func timerDidFire() {
         updateView();
     }
-
+    
     func updateArtwork() {
+        if currentImage == nil {
+            downloadArtwork();
+        }
+        imageView.image = currentImage;
+    }
+    
+    func downloadArtwork() {
         let id = spotify.currentTrack().id!().characters.split{ $0 == ":" }.map(String.init)[2];
         if let url = NSURL(string: "https://api.spotify.com/v1/tracks/\(id)"){
-            let request = NSMutableURLRequest(URL: url)
-            request.HTTPMethod = "GET"
+            let request = NSMutableURLRequest(URL: url);
+            request.HTTPMethod = "GET";
             
-            let session = NSURLSession.sharedSession()
+            let session = NSURLSession.sharedSession();
             session.dataTaskWithRequest(request, completionHandler: { (returnData, response, error) -> Void in
                 do {
-                    let jsonResult: NSDictionary = try NSJSONSerialization.JSONObjectWithData(returnData!, options: NSJSONReadingOptions.MutableContainers) as! NSDictionary
-                    let result = jsonResult["album"]!["images"]!![2]["url"]!! as! NSString;
+                    let jsonResult: NSDictionary = try NSJSONSerialization.JSONObjectWithData(returnData!, options: NSJSONReadingOptions.MutableContainers) as! NSDictionary;
+                    let result = jsonResult["album"]!["images"]!![1]["url"]!! as! NSString;
                     if !self.currentArtwork.isEqualToString(result as String) {
-                        self.downloadArtwork(result);
+                        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+                            let data = NSData(contentsOfURL: NSURL(string: result as String)!);
+                            dispatch_async(dispatch_get_main_queue(), {
+                                self.currentImage = NSImage(data: data!);
+                            });
+                        }
+                        
                         self.currentArtwork = result;
                     }
                 } catch {
                     print("Error parsing.");
                 }
                 
-            }).resume()
+            }).resume();
         }
-    }
-    
-    func downloadArtwork(urlToUse: NSString) {
-        let url = NSURL(string: urlToUse as String)
         
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-            let data = NSData(contentsOfURL: url!);
-            dispatch_async(dispatch_get_main_queue(), {
-                self.imageView.image = NSImage(data: data!);
-            });
-        }
     }
     
     func updateShuffleStatus() {
@@ -112,9 +117,9 @@ class PopoverController: NSViewController {
     }
     
     /**
-    Action to handle the repeat box being clicked.
-    
-    - parameter sender: ID of the object sending this
+     Action to handle the repeat box being clicked.
+     
+     - parameter sender: ID of the object sending this
      */
     @IBAction func repeatChecked(sender: NSButton) {
         print("Hit repeat");
@@ -142,7 +147,7 @@ class PopoverController: NSViewController {
     }
     
     @IBAction func sliderChange(sender: NSSliderCell) {
-        volumeLabel.stringValue = "\(sender.intValue) %";
+        volumeLabel.stringValue = "Volume: \(spotify.volume()) %";
         spotify.setVolume(sender.integerValue);
     }
 }
