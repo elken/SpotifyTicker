@@ -15,10 +15,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     weak var timer: NSTimer!
     
-    weak var pausedIcon: NSString!
+    var pausedIcon: String!
     
     var spotifyController: SpotifyController! = SpotifyController();
+    var preferencesController: PreferencesController! = PreferencesController(nibName: "Preferences", bundle: nil);;
     var popoverController: PopoverController! = PopoverController(nibName: "PopoverController", bundle: nil);
+    var aboutController: AboutController! = AboutController(nibName: "About", bundle: nil);
     
     var eventMonitor: EventMonitor!
     
@@ -33,7 +35,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     lazy var statusMenu: NSMenu = {
         let rightClickMenu = NSMenu();
-        rightClickMenu.addItem(NSMenuItem(title: "Quit", action: #selector(AppDelegate.quit), keyEquivalent: ""));
+        rightClickMenu.addItem(NSMenuItem(title: "About", action: #selector(showAbout), keyEquivalent: ""));
+        rightClickMenu.addItem(NSMenuItem(title: "Preferences", action: #selector(showPreferences), keyEquivalent: ""));
+        rightClickMenu.addItem(NSMenuItem.separatorItem());
+        rightClickMenu.addItem(NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: ""));
         return rightClickMenu;
     }()
     
@@ -55,7 +60,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSDistributedNotificationCenter.defaultCenter().addObserver(self, selector: #selector(toggleDark), name: "AppleInterfaceThemeChangedNotification", object: nil);
         
         toggleDark();
-        updateImage();
         
         eventMonitor = EventMonitor(mask: NSEventMask.LeftMouseDownMask) { [unowned self] event in
             if self.popover.shown {
@@ -64,6 +68,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         eventMonitor.start();
         timer.fire();
+    }
+    
+    func showPreferences() {
+        preferencesController.title = "Preferences";
+        preferencesController.presentViewControllerAsModalWindow(preferencesController);
+    }
+    
+    func showAbout() {
+        aboutController.title = "About";
+        aboutController.presentViewControllerAsModalWindow(aboutController);
     }
     
     func showContextMenu(sender: NSStatusBarButton!){
@@ -135,7 +149,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let current = spotifyController.currentTrack();
             let position = timeFormatted(spotifyController.playerPosition());
             let duration = timeFormatted((current.duration)! / 1000);
-            updateTitle("\(current.artist!) - \(current.name!) (\(position)/\(duration))");
+//            updateTitle(preferencesController.checkOrDefault("titleFormat", def: "\(current.artist!) - \(current.name!) (\(position)/\(duration))"));
+            var format: String = preferencesController.checkOrDefault("titleFormat", def: "%a - %s (%p/%d)");
+            
+            let d: [String: String] = ["%a": "\(current.artist!)",
+                                       "%s": "\(current.name!)",
+                                       "%p": "\(position)",
+                                       "%d": "\(duration)"];
+            
+            for (key, value) in d {
+                if format.containsString(key) {
+                    format = format.stringByReplacingOccurrencesOfString(key, withString: value);
+                }
+            }
+            
+            updateTitle(format);
         } else {
             statusItem.title = "▐▐ ";
         }
