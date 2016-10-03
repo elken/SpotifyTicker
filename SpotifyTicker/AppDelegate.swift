@@ -16,11 +16,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     weak var timer: NSTimer!
     
     var pausedIcon: String!
+    var titleFormat: String!
     
     var spotifyController: SpotifyController! = SpotifyController();
-    var preferencesController: PreferencesController! = PreferencesController(nibName: "Preferences", bundle: nil);;
+    var preferencesController: PreferencesController! = PreferencesController(nibName: "Preferences", bundle: nil);
     var popoverController: PopoverController! = PopoverController(nibName: "PopoverController", bundle: nil);
-    var aboutController: AboutController! = AboutController(nibName: "About", bundle: nil);
     
     var eventMonitor: EventMonitor!
     
@@ -28,8 +28,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let statusItem = NSStatusBar.systemStatusBar().statusItemWithLength(NSVariableStatusItemLength);
         statusItem.button?.target = self;
         statusItem.button?.action = #selector(AppDelegate.showContextMenu(_:));
-        let options: NSEventMask = [.LeftMouseUpMask, .RightMouseUpMask];
-        statusItem.button?.sendActionOn(Int(options.rawValue));
+        let options: NSEventMask = [NSLeftMouseUpMask, NSRightMouseUpMask];
+        statusItem.button?.sendActionOn(NSEventMask(rawValue: UInt64(Int(options.rawValue))));
         return statusItem;
     }()
     
@@ -51,17 +51,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }()
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
-        self.popoverController.downloadArtwork();
+//        self.popoverController.downloadArtwork();
         
         timer = NSTimer.scheduledTimerWithTimeInterval(1.0, target: self, selector: #selector(timerDidFire), userInfo: nil, repeats: true);
         NSRunLoop.mainRunLoop().addTimer(timer, forMode: NSRunLoopCommonModes)
 
         NSDistributedNotificationCenter.defaultCenter().addObserver(self, selector: #selector(notify), name: "com.spotify.client.PlaybackStateChanged", object: nil);
         NSDistributedNotificationCenter.defaultCenter().addObserver(self, selector: #selector(toggleDark), name: "AppleInterfaceThemeChangedNotification", object: nil);
+        NSDistributedNotificationCenter.defaultCenter().addObserver(self, selector: #selector(updateIconImage), name: "com.elken.SpotifyTicker.updateIcon", object: nil);
+        NSDistributedNotificationCenter.defaultCenter().addObserver(self, selector: #selector(updateFormat), name: "com.elken.SpotifyTicker.updateFormat", object: nil);
         
         toggleDark();
+        updateIconImage();
+        updateFormat();
+        updateTrackInfo();
         
-        eventMonitor = EventMonitor(mask: NSEventMask.LeftMouseDownMask) { [unowned self] event in
+        eventMonitor = EventMonitor(mask: NSLeftMouseDownMask) { [unowned self] event in
             if self.popover.shown {
                 self.closePopover(event);
             }
@@ -70,12 +75,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         timer.fire();
     }
     
+    func updateFormat() {
+        titleFormat = preferencesController.checkOrDefault("titleFormat", def: "%a - %s (%p/%d)");
+    }
+    
     func showPreferences() {
         preferencesController.title = "Preferences";
         preferencesController.presentViewControllerAsModalWindow(preferencesController);
     }
     
     func showAbout() {
+        let aboutController: AboutController! = AboutController(nibName: "About", bundle: nil);
         aboutController.title = "About";
         aboutController.presentViewControllerAsModalWindow(aboutController);
     }
@@ -89,8 +99,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    func updateImage() {
-        statusItem.image = NSImage(named: updateIcon());
+    func updateIconImage() {
+        if preferencesController.checkOrDefault("showIcon", def: 1) == 1 {
+            statusItem.image = NSImage(named: updateIcon());
+        } else {
+            statusItem.image = nil;
+        }
     }
     
     func updateTitle(name: String) {
@@ -140,9 +154,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func notify() {
-        self.popoverController.downloadArtwork();
+//        self.popoverController.downloadArtwork();
         updateTrackInfo();
-        updateImage();
     }
     
     func updateTrackInfo() {
@@ -150,7 +163,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let current = spotifyController.currentTrack();
             let position = timeFormatted(spotifyController.playerPosition());
             let duration = timeFormatted((current.duration)! / 1000);
-            var format: String = preferencesController.checkOrDefault("titleFormat", def: "%a - %s (%p/%d)");
+            var format: String = titleFormat;
             
             let d: [String: String] = ["%a": "\(current.artist!)",
                                        "%s": "\(current.name!)",
@@ -159,10 +172,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             for (key, value) in d {
                 if format.containsString(key) {
+                    if value.characters.count >= 20 {
+                        format = format.stringByReplacingOccurrencesOfString(key, withString: "\(value.substringToIndex(value.startIndex.advancedBy(20))) ...");
+                    }
                     format = format.stringByReplacingOccurrencesOfString(key, withString: value);
                 }
             }
-            
             updateTitle(format);
         } else {
             statusItem.title = "▐▐ ";
@@ -171,7 +186,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func toggleDark() {
         pausedIcon = NSUserDefaults.standardUserDefaults().stringForKey("AppleInterfaceStyle") == "Dark" ? "spotify-white" : "spotify-black";
-        updateImage();
+        updateIconImage();
     }
     
     func quit(sender : NSMenuItem) {

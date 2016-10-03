@@ -22,27 +22,27 @@ class PreferencesController: NSViewController {
     @IBOutlet weak var titleFormatBox: NSTextField!
     override func viewDidLoad() {
         super.viewDidLoad();
-        showIconButton.state = checkOrDefault("showIcon", def: 0);
+        showIconButton.state = checkOrDefault("showIcon", def: 1);
         artworkSizeCombo.selectItemAtIndex(checkOrDefault("artworkSize", def: 1));
         titleFormatBox.stringValue = checkOrDefault("titleFormat", def: "%a - %s (%p/%d)");
     }
     
     func checkOrDefault<ReturnType>(key: String, def: Any?) -> ReturnType {
         if let val = prefs.valueForKey(key) {
-            print("Got \(val).");
             return val as! ReturnType;
         } else {
-            print("Using \(def).");
             return def as! ReturnType;
         }
     }
     
     @IBAction func toggleShowIcon(sender: NSButton) {
         prefs.setObject(sender.state, forKey: "showIcon");
+        NSDistributedNotificationCenter.defaultCenter().postNotificationName("com.elken.SpotifyTicker.updateIcon", object: nil);
     }
     
     @IBAction func artworkSizeChanged(sender: NSComboBox) {
         prefs.setObject(sender.indexOfSelectedItem, forKey: "artworkSize");
+        NSDistributedNotificationCenter.defaultCenter().postNotificationName("com.elken.SpotifyTicker.updateArtworkSize", object: nil);
     }
     
     @IBAction func formatHelpClicked(sender: NSButton) {
@@ -59,5 +59,6 @@ class PreferencesController: NSViewController {
     
     @IBAction func titleFormatChanged(sender: AnyObject) {
         prefs.setObject(sender.stringValue!, forKey: "titleFormat");
+        NSDistributedNotificationCenter.defaultCenter().postNotificationName("com.elken.SpotifyTicker.updateFormat", object: nil);
     }
 }

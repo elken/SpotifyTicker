@@ -13,6 +13,9 @@ class AboutController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
     }
+    override func viewDidAppear() {
+        self.view.window?.styleMask.remove(NSWindowStyleMask.Resizable)
+    }
     
     @IBAction func githubClicked(sender: AnyObject) {
         if let url = NSURL(string: "http://www.github.com/elken") {

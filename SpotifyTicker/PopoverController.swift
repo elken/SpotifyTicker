@@ -12,10 +12,13 @@ import Foundation
 class PopoverController: NSViewController {
     
     var spotify: SpotifyController! = SpotifyController();
+    var preferencesController: PreferencesController = PreferencesController();
     
     var currentArtwork: NSString! = "";
     
     var currentImage: NSImage!
+    
+    var artworkSize: Int!
     
     @IBOutlet weak var artistLabel: NSTextField!
     @IBOutlet weak var songLabel: NSTextField!
@@ -32,9 +35,16 @@ class PopoverController: NSViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad();
-        NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: #selector(timerDidFire), userInfo: nil, repeats: true);
+        updateArtworkSize();
+        NSDistributedNotificationCenter.defaultCenter().addObserver(self, selector: #selector(notify), name: "com.spotify.client.PlaybackStateChanged", object: nil);
+        NSDistributedNotificationCenter.defaultCenter().addObserver(self, selector: #selector(updateArtworkSize), name: "com.elken.SpotifyTicker.updateArtworkSize", object: nil);
         
         updateView();
+    }
+    
+    func updateArtworkSize() {
+        artworkSize = preferencesController.checkOrDefault("artworkSize", def: 1);
+        downloadArtwork();
     }
     
     /**
@@ -44,6 +54,8 @@ class PopoverController: NSViewController {
         artistLabel.stringValue = spotify.currentTrack().artist!;
         albumLabel.stringValue = spotify.currentTrack().album!;
         songLabel.stringValue = spotify.currentTrack().name!;
+        artistLabel.controlSize = getControlSize(spotify.currentTrack().artist!);
+        albumLabel.controlSize = getControlSize(spotify.currentTrack().album!);
         
         playPauseButton.image = NSImage(named: spotify.isPlaying() ? "pauseTemplate" : "playTemplate");
         
@@ -51,18 +63,19 @@ class PopoverController: NSViewController {
         volumeSlider.integerValue = spotify.volume();
         updateShuffleStatus();
         updateRepeatStatus();
-        updateArtwork();
+        downloadArtwork();
     }
     
-    func timerDidFire() {
-        updateView();
-    }
-    
-    func updateArtwork() {
-        if currentImage == nil {
-            downloadArtwork();
+    func getControlSize(str: String) -> NSControlSize {
+        if str.characters.count >= 29 {
+            return .Small;
+        } else {
+            return .Regular;
         }
-        imageView.image = currentImage;
+    }
+    
+    func notify() {
+        updateView();
     }
     
     func downloadArtwork() {
@@ -75,12 +88,15 @@ class PopoverController: NSViewController {
             session.dataTaskWithRequest(request, completionHandler: { (returnData, response, error) -> Void in
                 do {
                     let jsonResult: NSDictionary = try NSJSONSerialization.JSONObjectWithData(returnData!, options: NSJSONReadingOptions.MutableContainers) as! NSDictionary;
-                    let result = jsonResult["album"]!["images"]!![1]["url"]!! as! NSString;
+                    let result = jsonResult["album"]!["images"]!![self.artworkSize]["url"]!! as! NSString;
                     if !self.currentArtwork.isEqualToString(result as String) {
                         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
                             let data = NSData(contentsOfURL: NSURL(string: result as String)!);
                             dispatch_async(dispatch_get_main_queue(), {
                                 self.currentImage = NSImage(data: data!);
+                                if self.imageView != nil {
+                                    self.imageView.image = self.currentImage;
+                                }
                             });
                         }
                         
@@ -92,7 +108,9 @@ class PopoverController: NSViewController {
                 
             }).resume();
         }
-        
+        if self.imageView != nil {
+            self.imageView.image = self.currentImage;
+        }
     }
     
     func updateShuffleStatus() {
@@ -111,7 +129,6 @@ class PopoverController: NSViewController {
      - parameter sender: ID of the object sending this
      */
     @IBAction func shuffleChecked(sender: NSButton) {
-        print("Hit shuffle");
         spotify.toggleShuffle();
         updateShuffleStatus();
     }
@@ -122,7 +139,6 @@ class PopoverController: NSViewController {
      - parameter sender: ID of the object sending this
      */
     @IBAction func repeatChecked(sender: NSButton) {
-        print("Hit repeat");
         spotify.toggleRepeat();
         updateRepeatStatus();
     }
