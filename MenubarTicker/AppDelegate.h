@@ -12,4 +12,5 @@
 
 @property (nonatomic, retain) IBOutlet NSMenu *statusMenu;
 
+- (NSString *)timeFormatted:(int)totalSeconds;
 @end

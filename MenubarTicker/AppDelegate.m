@@ -9,40 +9,46 @@
 #import "AppDelegate.h"
 
 #import "iTunes.h"
-#import "Rdio.h"
 #import "Spotify.h"
 
-const NSTimeInterval kPollingInterval = 10.0;
+const NSTimeInterval kPollingInterval = 1.0;
 
 
 @interface AppDelegate ()
 
 @property (nonatomic, retain) iTunesApplication *iTunes;
-@property (nonatomic, retain) RdioApplication *rdio;
 @property (nonatomic, retain) SpotifyApplication *spotify;
 
 @property (nonatomic, retain) NSStatusItem *statusItem;
 @property (nonatomic, retain) NSTimer *timer;
 
+- (NSString *)timeFormatted:(int)totalSeconds;
 @end
 
 
 @implementation AppDelegate
 
 @synthesize iTunes;
-@synthesize rdio;
 @synthesize spotify;
 
 @synthesize statusItem;
 @synthesize statusMenu;
 @synthesize timer;
 
+- (NSString *)timeFormatted:(int)totalSeconds
+{
+    int seconds = totalSeconds % 60;
+    int minutes = (totalSeconds / 60) % 60;
+    int hours = totalSeconds / 3600;
+    
+    return hours == 0 ? [NSString stringWithFormat:@"%02d:%02d", minutes, seconds] : [NSString stringWithFormat:@"%02d:%02d:%02d",hours, minutes, seconds];
+}
+
 - (void)dealloc
 {
     [[NSDistributedNotificationCenter defaultCenter] removeObserver:self name:nil object:nil];
 
     self.iTunes = nil;
-    self.rdio = nil;
     self.spotify = nil;
     
     self.statusItem = nil;
@@ -69,11 +75,6 @@ const NSTimeInterval kPollingInterval = 10.0;
     
     [[NSDistributedNotificationCenter defaultCenter] addObserver:self
                                                         selector:@selector(didReceivePlayerNotification:)
-                                                            name:@"com.rdio.desktop.playStateChanged"
-                                                          object:nil];
-    
-    [[NSDistributedNotificationCenter defaultCenter] addObserver:self
-                                                        selector:@selector(didReceivePlayerNotification:)
                                                             name:@"com.spotify.client.PlaybackStateChanged"
                                                           object:nil];
 }
@@ -81,7 +82,6 @@ const NSTimeInterval kPollingInterval = 10.0;
 - (void)awakeFromNib
 {
     self.iTunes = [SBApplication applicationWithBundleIdentifier:@"com.apple.iTunes"];
-    self.rdio = [SBApplication applicationWithBundleIdentifier:@"com.rdio.desktop"];
     self.spotify = [SBApplication applicationWithBundleIdentifier:@"com.spotify.client"];
     
     self.statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
@@ -92,22 +92,53 @@ const NSTimeInterval kPollingInterval = 10.0;
     [self updateTrackInfo];
 }
 
+- (NSString*)runningPlayer
+{
+    if ([self.iTunes isRunning] && [self.iTunes playerState] == iTunesEPlSPlaying) {
+        return @"itunes";
+    } else if ([self.spotify isRunning] && [self.spotify playerState] == SpotifyEPlSPlaying) {
+        return @"spotify";
+    } else {
+        return nil;
+    }
+}
+
+- (NSString*)trimString:(NSString*)s
+{
+    return [NSString stringWithFormat:@"%@...", [s substringToIndex:20]];
+}
+
 
 - (void)updateTrackInfo
 {
+    NSString *player = [self runningPlayer];
     id currentTrack = nil;
+    double duration = 0;
+    double position = 0;
     
-    if ([self.iTunes isRunning] && [self.iTunes playerState] == iTunesEPlSPlaying) {
-        currentTrack = [self.iTunes currentTrack];
-    } else if ([self.rdio isRunning] && [self.rdio playerState] == RdioEPSSPlaying) {
-        currentTrack = [self.rdio currentTrack];
-    } else if ([self.spotify isRunning] && [self.spotify playerState] == SpotifyEPlSPlaying) {
-        currentTrack = [self.spotify currentTrack];
+    if (player != nil) {
+        statusItem.image = [NSImage imageNamed: player];
     }
-
-    statusItem.title = currentTrack ? [NSString stringWithFormat:@"%@ - %@", [currentTrack artist], [currentTrack name]]
-                                    : @"♫"; // 🎵 or 🎶 or ♫
+    
+    if ([player  isEqual: @"itunes"]) {
+        currentTrack = [self.iTunes currentTrack];
+        duration = [[self.iTunes currentTrack] duration];
+        position = [self.iTunes playerPosition];
+    } else if ([player  isEqual: @"spotify"]) {
+        currentTrack = [self.spotify currentTrack];
+        duration = [self.spotify currentTrack].duration / 1000;
+        position = [self.spotify playerPosition];
+    }
+    if (currentTrack) {
+        NSString *artist = [currentTrack artist].length >= 20 ? [self trimString :[currentTrack artist]] : [currentTrack artist];
+        NSString *name = [currentTrack name].length >= 20 ? [self trimString: [currentTrack name]] : [currentTrack name];
+        statusItem.title = [NSString stringWithFormat:@"%@ - %@ (%@/%@)", artist, name, [self timeFormatted :position], [self timeFormatted :duration]];
+    } else {
+        statusItem.title = @"❙ ❙";
+    }
+    
 }
+
 
 - (void)timerDidFire:(NSTimer *)theTimer
 {
@@ -118,5 +149,6 @@ const NSTimeInterval kPollingInterval = 10.0;
 {
     [self updateTrackInfo];
 }
+
 
 @end
